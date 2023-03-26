@@ -1,0 +1,42 @@
+version: "3.4"
+
+services:
+  jubo-rdb:
+    image: postgres:13.4
+    container_name: jubo-rdb
+    restart: always
+    environment:
+      - POSTGRES_DB=test
+      - POSTGRES_USER=caesar
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "15432:5432"
+    volumes:
+      # - /etc/localtime:/etc/localtime:ro
+      - data:/var/lib/postgresql/data
+
+#   jubo-server:
+#     image: ""
+#     container_name: jubo-server
+#     restart: always
+#     ports:
+#       - "8888:8888"
+# #    volumes:
+# #      - .backend/configs:/app/backend/configs
+#     depends_on:
+#       - jubo-rdb
+
+#   jubo-web:
+#     image: ""
+#     container_name: jubo-web
+#     restart: always
+#     ports:
+#       - "80:80"
+# #    volumes:
+# #      - .frontend/configs:/app/frontend/configs
+#     depends_on:
+#       - jubo-server
+
+volumes:
+  data:
+    name: jubo-rdb-data

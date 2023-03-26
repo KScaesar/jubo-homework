@@ -1,0 +1,11 @@
+server_port: "8888"
+
+pgsql:
+  user: "caesar"
+  password: "1234"
+  host: "127.0.0.1"
+  port: "15432"
+  database: "test"
+  max_conn: 8
+  max_idle_conn: 4
+  debug_mode: true
