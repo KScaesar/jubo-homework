@@ -1,7 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/KScaesar/jubo-homework/backend/configs"
+)
 
 func main() {
-	fmt.Println("Hello, 世界")
+	cfg, err := configs.NewProjectConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(*cfg, cfg.Pgsql)
 }

@@ -24,7 +24,7 @@ bash project.sh -s
 
 - backend:  
 	golang gin gorm  
-	wire testtify  
+	wire testtify go-playground  
 	ulid PostgreSQL  
 
 - frontend:  

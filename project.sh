@@ -92,7 +92,7 @@ normal_health_check() {
 
 while getopts "cls" opt; do
     case $opt in
-    c) # cotainer
+    c) # container
         docker-compose -p jubo up -d
 
         container_health_check \
