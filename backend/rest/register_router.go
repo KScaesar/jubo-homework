@@ -13,8 +13,8 @@ func RegisterRouter(
 	// gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
+	router.Use(CorsMiddleware(), GetOrSetCorrelationId)
 	router.NoRoute(WarnApiRouteNotExist)
-	router.Use(GetOrSetCorrelationId)
 
 	v1 := router.Group("/v1/api")
 
