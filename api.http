@@ -17,3 +17,42 @@ Content-Type: application/json
 GET http://localhost:8888/v1/api/patients
 Accept: application/json
 Authorization: Bearer {{user_token}}
+
+###
+
+GET http://localhost:8888/v1/api/orders
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+###
+
+GET http://localhost:8888/v1/api/orders?patient_id=01GWFC9277K77PP1XX57BNHBFS
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+###
+
+POST http://localhost:8888/v1/api/orders
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "message": "病人精神狀態不佳, 要注意睡眠",
+  "patient_id": "01GWFC9277K77PP1XX57BNHBFS"
+}
+
+###
+
+GET http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W1SF3ACJG
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+###
+
+PATCH http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W1SF3ACJG
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "message": "血糖超過120，建議施打 10 單位胰島素"
+}

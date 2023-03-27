@@ -18,7 +18,7 @@ type PatientRepo interface {
 }
 
 type Patient struct {
-	Id        string    `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
+	Id        string    `gorm:"column:id"`
+	Name      string    `gorm:"column:name"`
+	CreatedAt time.Time `gorm:"column:created_at"`
 }

@@ -26,7 +26,11 @@ func NewHttpServerV1(cfg *configs.ProjectConfig) (*gin.Engine, error) {
 	patientRepository := infra.NewPatientRepository(wrapperGorm)
 	patientUseCase := application.NewPatientUseCase(patientRepository)
 	patientHandler := rest.NewPatientHandler(patientUseCase)
-	engine := rest.RegisterRouter(patientHandler)
+	orderRepository := infra.NewOrderRepository(wrapperGorm)
+	orderUseCase := application.NewOrderUseCase(orderRepository, patientRepository)
+	gormTxFactory := database.NewGormTxFactory(wrapperGorm)
+	orderHandler := rest.NewOrderHandler(orderUseCase, gormTxFactory)
+	engine := rest.RegisterRouter(patientHandler, orderHandler)
 	return engine, nil
 }
 
@@ -42,15 +46,21 @@ func NewHttpServerV2(cfg *configs.ProjectConfig) (*gin.Engine, error) {
 	}
 	patientService := iocAppV2.PatientService
 	patientHandler := rest.NewPatientHandler(patientService)
-	engine := rest.RegisterRouter(patientHandler)
+	orderService := iocAppV2.OrderService
+	gormTxFactory := database.NewGormTxFactory(wrapperGorm)
+	orderHandler := rest.NewOrderHandler(orderService, gormTxFactory)
+	engine := rest.RegisterRouter(patientHandler, orderHandler)
 	return engine, nil
 }
 
 func NewAppV2(cfg *configs.ProjectConfig, db *database.WrapperGorm) (*AppV2, error) {
 	patientRepository := infra.NewPatientRepository(db)
 	patientUseCase := application.NewPatientUseCase(patientRepository)
+	orderRepository := infra.NewOrderRepository(db)
+	orderUseCase := application.NewOrderUseCase(orderRepository, patientRepository)
 	iocAppV2 := &AppV2{
 		PatientService: patientUseCase,
+		OrderService:   orderUseCase,
 	}
 	return iocAppV2, nil
 }

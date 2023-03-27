@@ -37,7 +37,7 @@ func (repo *PatientRepository) QueryPatientById(ctx context.Context, id string) 
 
 	err = db.Table(PatientTableName).Where("id = ?", id).First(&patient).Error
 	if err != nil {
-		err = errors.WrapWithMessage(database.GormError(err), "id = %v", id)
+		err = errors.WrapWithMessage(database.GormError(err), "patient id = %v", id)
 		return
 	}
 	return

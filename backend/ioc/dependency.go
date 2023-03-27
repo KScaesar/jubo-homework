@@ -23,21 +23,23 @@ var infraDependency = wire.NewSet(
 )
 
 var appV1 = wire.NewSet(
-	application.NewPatientUseCase,
-	wire.Bind(new(application.PatientService), new(*application.PatientUseCase)),
 	infra.NewPatientRepository,
 	wire.Bind(new(domain.PatientRepo), new(*infra.PatientRepository)),
+	infra.NewOrderRepository,
+	wire.Bind(new(domain.OrderRepo), new(*infra.OrderRepository)),
+
+	application.NewPatientUseCase,
+	wire.Bind(new(application.PatientService), new(*application.PatientUseCase)),
+	application.NewOrderUseCase,
+	wire.Bind(new(application.OrderService), new(*application.OrderUseCase)),
 )
 
 var appV2 = wire.NewSet(
 	wire.Struct(new(AppV2), "*"),
-
-	application.NewPatientUseCase,
-	wire.Bind(new(application.PatientService), new(*application.PatientUseCase)),
-	infra.NewPatientRepository,
-	wire.Bind(new(domain.PatientRepo), new(*infra.PatientRepository)),
+	appV1,
 )
 
 type AppV2 struct {
 	PatientService application.PatientService
+	OrderService   application.OrderService
 }

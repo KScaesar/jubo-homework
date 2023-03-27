@@ -6,6 +6,7 @@ import (
 
 func RegisterRouter(
 	patientH *PatientHandler,
+	orderH *OrderHandler,
 ) *gin.Engine {
 
 	gin.SetMode(gin.DebugMode)
@@ -18,6 +19,11 @@ func RegisterRouter(
 	v1 := router.Group("/v1/api")
 
 	v1.GET("/patients", patientH.QueryPatientList)
+
+	v1.GET("/orders", orderH.QueryOrderList)
+	v1.GET("/orders/:order_id", orderH.QueryOrderById)
+	v1.POST("/orders", orderH.CreateOrder)
+	v1.PATCH("/orders/:order_id", orderH.UpdateOrderInfo)
 
 	return router
 }

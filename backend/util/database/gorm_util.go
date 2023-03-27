@@ -102,7 +102,7 @@ func GormSortDsl(sort interface{}) []func(db *gorm.DB) *gorm.DB {
 
 func GormPageDsl(
 	originDB *gorm.DB,
-	pageOption util.DtoPageParam,
+	pageParam util.DtoPageParam,
 ) (
 	modifiedDB *gorm.DB,
 	listBufferSize int64,
@@ -113,11 +113,11 @@ func GormPageDsl(
 	const defaultBufferSize = 10
 	listBufferSize = defaultBufferSize
 
-	if !pageOption.RestrictedSize() {
+	if !pageParam.RestrictedSize() {
 		return
 	}
 
-	err = pageOption.Validate()
+	err = pageParam.Validate()
 	if err != nil {
 		return
 	}
@@ -129,12 +129,12 @@ func GormPageDsl(
 		return
 	}
 
-	listBufferSize = *pageOption.Size
-	pageResponse, _ = util.NewDtoPageResponse(pageOption, totalSize)
+	listBufferSize = *pageParam.Size
+	pageResponse, _ = util.NewDtoPageResponse(pageParam, totalSize)
 
 	modifiedDB = originDB.
-		Offset(int(pageOption.OffsetOrSkip())).
-		Limit(int(*pageOption.Size))
+		Offset(int(pageParam.OffsetOrSkip())).
+		Limit(int(*pageParam.Size))
 
 	return
 }

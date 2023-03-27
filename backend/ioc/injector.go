@@ -16,10 +16,10 @@ import (
 func NewHttpServerV1(cfg *configs.ProjectConfig) (*gin.Engine, error) {
 	panic(wire.Build(
 		infraDependency,
-
 		appV1,
 
 		rest.NewPatientHandler,
+		rest.NewOrderHandler,
 
 		rest.RegisterRouter,
 	))
@@ -31,8 +31,10 @@ func NewHttpServerV2(cfg *configs.ProjectConfig) (*gin.Engine, error) {
 
 		NewAppV2,
 		wire.FieldsOf(new(*AppV2), "PatientService"),
+		wire.FieldsOf(new(*AppV2), "OrderService"),
 
 		rest.NewPatientHandler,
+		rest.NewOrderHandler,
 
 		rest.RegisterRouter,
 	))

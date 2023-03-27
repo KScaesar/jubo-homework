@@ -12,26 +12,14 @@ func TransformPatientModel(patient *Patient) DtoPatientResponse {
 // read dto
 
 type DtoPatientResponse struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id   string `json:"id" gorm:"column:id"`
+	Name string `json:"name" gorm:"column:name"`
 }
 
 type DtoQryPatientParam struct {
 	DtoFilterPatientParam
 	DtoSortPatientParam
 	util.DtoPageParam
-}
-
-func (d *DtoQryPatientParam) FilterParam() any {
-	return &d.DtoFilterPatientParam
-}
-
-func (d *DtoQryPatientParam) SortParam() any {
-	return &d.DtoSortPatientParam
-}
-
-func (d *DtoQryPatientParam) PageParam() util.DtoPageParam {
-	return d.DtoPageParam
 }
 
 type DtoFilterPatientParam struct {
@@ -46,4 +34,16 @@ func (dto *DtoSortPatientParam) SetDefault() {
 	if dto.SortCreatedAt == "" {
 		dto.SortCreatedAt = util.SortDesc
 	}
+}
+
+func (d *DtoQryPatientParam) FilterParam() any {
+	return &d.DtoFilterPatientParam
+}
+
+func (d *DtoQryPatientParam) SortParam() any {
+	return &d.DtoSortPatientParam
+}
+
+func (d *DtoQryPatientParam) PageParam() util.DtoPageParam {
+	return d.DtoPageParam
 }
