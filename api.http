@@ -1,0 +1,19 @@
+# https://www.jetbrains.com/help/idea/http-response-handling-examples.html#script-var-example
+
+POST http://localhost:8888/v1/api/users-SignIn
+Content-Type: application/json
+
+{
+  "account": "a1234",
+  "password": "b1234567"
+}
+
+> {%
+  client.global.set("user_token", response.body.payload.token);
+%}
+
+###
+
+GET http://localhost:8888/v1/api/patients
+Accept: application/json
+Authorization: Bearer {{user_token}}

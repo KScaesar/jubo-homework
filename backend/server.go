@@ -1,16 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/KScaesar/jubo-homework/backend/configs"
+	"github.com/KScaesar/jubo-homework/backend/ioc"
 )
 
 func main() {
+	log.Default().Println("server load config !")
+
 	cfg, err := configs.NewProjectConfig()
 	if err != nil {
-		panic(err)
+		log.Default().Panic(err)
 	}
 
-	fmt.Println(*cfg, cfg.Pgsql)
+	server, err := ioc.NewHttpServer(cfg)
+	if err != nil {
+		log.Default().Panic(err)
+	}
+
+	log.Default().Println("server run !")
+	err = server.Run(":" + cfg.ServerPort)
+	if err != nil {
+		log.Default().Panic(err)
+	}
 }
