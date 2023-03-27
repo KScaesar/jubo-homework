@@ -55,7 +55,7 @@ curl -X PATCH --location "http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W
 
 ```bash
 # backend
-docker build -f Dockerfile-backend -t x246libra/jubo-homework:v1.0 . && \
+docker build -f Dockerfile-backend -t x246libra/jubo-homework-backend:v1.0 . && \
     docker rmi `docker images --filter label=stage=builder -q`
 ```
 

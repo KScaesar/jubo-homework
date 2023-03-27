@@ -16,7 +16,7 @@ services:
       - data:/var/lib/postgresql/data
 
   jubo-server:
-     image: "x246libra/jubo-homework:v1.0"
+     image: "x246libra/jubo-homework-backend:v1.0"
      container_name: jubo-server
      restart: always
      ports:
