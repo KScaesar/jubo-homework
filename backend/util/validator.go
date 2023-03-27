@@ -11,10 +11,17 @@ func init() {
 	Validator.RegisterValidation(NewRegisterValidation[SortKind]("sort"))
 }
 
-func NewRegisterValidation[T interface{ IsValid() bool }](tagKeyName string) (string, func(fl validator.FieldLevel) bool) {
-	playground_validator_signature := func(fl validator.FieldLevel) bool {
-		value := fl.Field().Interface().(T)
-		return value.IsValid()
+type IValidator interface {
+	Validate() error
+}
+
+func NewRegisterValidation[T IValidator](tagKeyName string) (string, validator.Func) {
+	return tagKeyName, func(fl validator.FieldLevel) bool {
+		obj := fl.Field().Interface().(T)
+		err := obj.Validate()
+		if err != nil {
+			return false
+		}
+		return true
 	}
-	return tagKeyName, playground_validator_signature
 }

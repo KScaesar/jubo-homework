@@ -44,15 +44,7 @@ const (
 
 type SortKind string
 
-func (s SortKind) IsValid() bool {
-	err := s.validate()
-	if err != nil {
-		return false
-	}
-	return true
-}
-
-func (s SortKind) validate() error {
+func (s SortKind) Validate() error {
 	value := SortKind(strings.ToLower(string(s)))
 
 	switch value {
@@ -65,10 +57,18 @@ func (s SortKind) validate() error {
 
 func (s *SortKind) UnmarshalText(text []byte) error {
 	*s = SortKind(text)
-	return s.validate()
+	return s.Validate()
 }
 
-func ValidateSort(sort any) error {
+// ValidateSortParam
+//
+// SortParam example:
+//
+//	type DtoSortUserParam struct {
+//		SortUpdatedAt SortKind `form:"sort_updated_at" rdb:"updated_at" validate:"sort"`
+//		SortCreatedAt SortKind `form:"sort_created_at" rdb:"created_at" validate:"sort"`
+//	}
+func ValidateSortParam(sort any) error {
 	if sort == nil {
 		return nil
 	}
@@ -87,12 +87,12 @@ func ValidateSort(sort any) error {
 			value = field.Value()
 		}
 
-		fn, ok := value.(SortKind)
+		obj, ok := value.(SortKind)
 		if !ok {
 			continue
 		}
 
-		err := fn.validate()
+		err := obj.Validate()
 		if err != nil {
 			return err
 		}
