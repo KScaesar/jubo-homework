@@ -15,16 +15,16 @@ services:
       # - /etc/localtime:/etc/localtime:ro
       - data:/var/lib/postgresql/data
 
-#   jubo-server:
-#     image: ""
-#     container_name: jubo-server
-#     restart: always
-#     ports:
-#       - "8888:8888"
-# #    volumes:
-# #      - .backend/configs:/app/backend/configs
-#     depends_on:
-#       - jubo-rdb
+  jubo-server:
+     image: "x246libra/jubo-homework:v1.0"
+     container_name: jubo-server
+     restart: always
+     ports:
+       - "8888:8888"
+ #    volumes:
+ #      - .backend/configs:/app/backend/configs
+     depends_on:
+       - jubo-rdb
 
 #   jubo-web:
 #     image: ""

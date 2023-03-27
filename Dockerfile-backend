@@ -1,0 +1,22 @@
+# First stage: Build the binary
+FROM golang:1.20-buster AS builder
+
+LABEL stage=builder
+WORKDIR /build
+
+COPY . .
+RUN go mod download && CGO_ENABLED=0 go build -trimpath -o ./server ./backend/server.go
+
+# Second stage: Copy the binary from the builder stage and run it
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /build/server .
+COPY ./backend/configs/container.yaml ./configs/container.yaml
+
+ENV WorkDir="/app"
+ENV ConfigPath="./configs/container.yaml"
+
+EXPOSE 8888
+CMD ["./server"]

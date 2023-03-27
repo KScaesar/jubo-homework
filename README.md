@@ -18,17 +18,44 @@ bash project.sh -s
 ## backend api
 
 ```bash
+curl -X GET --location "http://localhost:8888/v1/api/patients" \
+-H "Accept: application/json"
+
+curl -X GET --location "http://localhost:8888/v1/api/orders" \
+-H "Accept: application/json"
+
+curl -X GET --location "http://localhost:8888/v1/api/orders?patient_id=01GWFC9277K77PP1XX57BNHBFS" \
+-H "Accept: application/json"
+
+curl -X POST --location "http://localhost:8888/v1/api/orders" \
+-H "Accept: application/json" \
+-d '{ "message": "病人精神狀態不佳, 要注意睡眠", "patient_id": "01GWFC9277K77PP1XX57BNHBFS" }'
+
+curl -X GET --location "http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W1SF3ACJG" \
+-H "Accept: application/json"
+
+curl -X PATCH --location "http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W1SF3ACJG" \
+-H "Accept: application/json" \
+-d '{ "message": "血糖超過120，建議施打 10 單位胰島素" }'
+
 ```
 
 ## 使用技術
 
 - backend:  
 	golang gin gorm  
-	wire testtify  
+	wire testtify go-playground  
 	ulid PostgreSQL  
 
 - frontend:  
 	react Next.js axios  
 	MUI(material-ui)  
 
+# Dockerfile
+
+```bash
+# backend
+docker build -f Dockerfile-backend -t x246libra/jubo-homework:v1.0 . && \
+    docker rmi `docker images --filter label=stage=builder -q`
+```
 

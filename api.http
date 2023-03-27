@@ -1,0 +1,58 @@
+# https://www.jetbrains.com/help/idea/http-response-handling-examples.html#script-var-example
+
+POST http://localhost:8888/v1/api/users-SignIn
+Content-Type: application/json
+
+{
+  "account": "a1234",
+  "password": "b1234567"
+}
+
+> {%
+  client.global.set("user_token", response.body.payload.token);
+%}
+
+###
+
+GET http://localhost:8888/v1/api/patients
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+###
+
+GET http://localhost:8888/v1/api/orders
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+###
+
+GET http://localhost:8888/v1/api/orders?patient_id=01GWFC9277K77PP1XX57BNHBFS
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+###
+
+POST http://localhost:8888/v1/api/orders
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "message": "病人精神狀態不佳, 要注意睡眠",
+  "patient_id": "01GWFC9277K77PP1XX57BNHBFS"
+}
+
+###
+
+GET http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W1SF3ACJG
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+###
+
+PATCH http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W1SF3ACJG
+Accept: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "message": "血糖超過120，建議施打 10 單位胰島素"
+}
