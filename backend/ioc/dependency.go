@@ -13,19 +13,6 @@ import (
 // wire bug because generic type:
 // https://github.com/google/wire/pull/360#issuecomment-1141376353
 
-var app = wire.NewSet(
-	wire.Struct(new(App), "*"),
-
-	application.NewPatientUseCase,
-	wire.Bind(new(application.PatientService), new(*application.PatientUseCase)),
-	infra.NewPatientRepository,
-	wire.Bind(new(domain.PatientRepo), new(*infra.PatientRepository)),
-)
-
-type App struct {
-	PatientService application.PatientService
-}
-
 var infraDependency = wire.NewSet(
 	wire.FieldsOf(new(*configs.ProjectConfig), "Pgsql"),
 
@@ -34,3 +21,23 @@ var infraDependency = wire.NewSet(
 	database.NewGormTxFactory,
 	wire.Bind(new(database.TransactionFactory), new(*database.GormTxFactory)),
 )
+
+var appV1 = wire.NewSet(
+	application.NewPatientUseCase,
+	wire.Bind(new(application.PatientService), new(*application.PatientUseCase)),
+	infra.NewPatientRepository,
+	wire.Bind(new(domain.PatientRepo), new(*infra.PatientRepository)),
+)
+
+var appV2 = wire.NewSet(
+	wire.Struct(new(AppV2), "*"),
+
+	application.NewPatientUseCase,
+	wire.Bind(new(application.PatientService), new(*application.PatientUseCase)),
+	infra.NewPatientRepository,
+	wire.Bind(new(domain.PatientRepo), new(*infra.PatientRepository)),
+)
+
+type AppV2 struct {
+	PatientService application.PatientService
+}

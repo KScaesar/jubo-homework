@@ -17,27 +17,40 @@ import (
 
 // Injectors from injector.go:
 
-func NewHttpServer(cfg *configs.ProjectConfig) (*gin.Engine, error) {
+func NewHttpServerV1(cfg *configs.ProjectConfig) (*gin.Engine, error) {
 	dbConfig := cfg.Pgsql
 	wrapperGorm, err := database.NewGormPgsql(dbConfig)
 	if err != nil {
 		return nil, err
 	}
-	iocApp, err := NewApp(cfg, wrapperGorm)
-	if err != nil {
-		return nil, err
-	}
-	patientService := iocApp.PatientService
-	patientHandler := rest.NewPatientHandler(patientService)
-	engine := rest.RegisterRouter(cfg, patientHandler)
+	patientRepository := infra.NewPatientRepository(wrapperGorm)
+	patientUseCase := application.NewPatientUseCase(patientRepository)
+	patientHandler := rest.NewPatientHandler(patientUseCase)
+	engine := rest.RegisterRouter(patientHandler)
 	return engine, nil
 }
 
-func NewApp(cfg *configs.ProjectConfig, db *database.WrapperGorm) (*App, error) {
+func NewHttpServerV2(cfg *configs.ProjectConfig) (*gin.Engine, error) {
+	dbConfig := cfg.Pgsql
+	wrapperGorm, err := database.NewGormPgsql(dbConfig)
+	if err != nil {
+		return nil, err
+	}
+	iocAppV2, err := NewAppV2(cfg, wrapperGorm)
+	if err != nil {
+		return nil, err
+	}
+	patientService := iocAppV2.PatientService
+	patientHandler := rest.NewPatientHandler(patientService)
+	engine := rest.RegisterRouter(patientHandler)
+	return engine, nil
+}
+
+func NewAppV2(cfg *configs.ProjectConfig, db *database.WrapperGorm) (*AppV2, error) {
 	patientRepository := infra.NewPatientRepository(db)
 	patientUseCase := application.NewPatientUseCase(patientRepository)
-	iocApp := &App{
+	iocAppV2 := &AppV2{
 		PatientService: patientUseCase,
 	}
-	return iocApp, nil
+	return iocAppV2, nil
 }

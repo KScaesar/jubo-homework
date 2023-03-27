@@ -13,19 +13,33 @@ import (
 
 //go:generate wire gen
 
-func NewHttpServer(cfg *configs.ProjectConfig) (*gin.Engine, error) {
+func NewHttpServerV1(cfg *configs.ProjectConfig) (*gin.Engine, error) {
 	panic(wire.Build(
 		infraDependency,
-		rest.RegisterRouter,
-		NewApp,
+
+		appV1,
 
 		rest.NewPatientHandler,
-		wire.FieldsOf(new(*App), "PatientService"),
+
+		rest.RegisterRouter,
 	))
 }
 
-func NewApp(cfg *configs.ProjectConfig, db *database.WrapperGorm) (*App, error) {
+func NewHttpServerV2(cfg *configs.ProjectConfig) (*gin.Engine, error) {
 	panic(wire.Build(
-		app,
+		infraDependency,
+
+		NewAppV2,
+		wire.FieldsOf(new(*AppV2), "PatientService"),
+
+		rest.NewPatientHandler,
+
+		rest.RegisterRouter,
+	))
+}
+
+func NewAppV2(cfg *configs.ProjectConfig, db *database.WrapperGorm) (*AppV2, error) {
+	panic(wire.Build(
+		appV2,
 	))
 }

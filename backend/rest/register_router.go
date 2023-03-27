@@ -2,12 +2,9 @@ package rest
 
 import (
 	"github.com/gin-gonic/gin"
-
-	"github.com/KScaesar/jubo-homework/backend/configs"
 )
 
 func RegisterRouter(
-	cfg *configs.ProjectConfig,
 	patientH *PatientHandler,
 ) *gin.Engine {
 

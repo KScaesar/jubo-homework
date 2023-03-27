@@ -15,7 +15,7 @@ func main() {
 		log.Default().Panic(err)
 	}
 
-	server, err := ioc.NewHttpServer(cfg)
+	server, err := ioc.NewHttpServerV1(cfg)
 	if err != nil {
 		log.Default().Panic(err)
 	}
