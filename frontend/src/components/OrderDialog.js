@@ -16,23 +16,13 @@ export default function OrderDialog({open, onClose, patient}) {
       setOrders(list.map((order) => ({...order, ...view})))
     }
     go()
-  }, [patient.id])
+  }, [patient.id,])
 
-  const handleAddViewOrder = (patient) => {
-    let newOrder = {
-      id: new Date().getTime().toString(),
-      message: 'edit message...',
-      patient_id: patient.id,
+  const handleApiSaveOrder = (buttonEvent, idx) => {
+    if (buttonEvent && buttonEvent.type === '"click"') {
+      buttonEvent.preventDefault()
+    }
 
-      mode: 'c',
-      click: 0,
-    };
-    newOrder.mode = 'c'
-    setOrders([newOrder, ...orders]);
-  };
-
-  const handleApiSaveOrder = (event, idx) => {
-    event.preventDefault()
     let target = orders.find((order, i) => (i === idx));
     if (target.mode === 'r') {
       return
@@ -44,24 +34,47 @@ export default function OrderDialog({open, onClose, patient}) {
       if (mode === 'u') {
         await ApiOrder.UpdateOrderInfo(target)
       } else if (mode === 'c') {
-        await ApiOrder.CreateOrder(target)
+        let id = await ApiOrder.CreateOrder(target)
+        target.id = id
       }
       setOrders([...orders])
     }
     go()
   }
 
-  const handleApiUpdateOrder = (event, idx) => {
+  const handleAddViewOrder = (patient) => {
+    let newOrder = {
+      id: new Date().getTime().toString(),
+      message: 'edit message...',
+      patient_id: patient.id,
+
+      mode: 'c',
+      firstClick: true,
+    };
+    newOrder.mode = 'c'
+    setOrders([newOrder, ...orders]);
+  };
+
+  const handleChangeSymbol = (event, idx) => {
     event.preventDefault()
+    let target = orders.find((order, i) => (i === idx));
+    target.mode = 'u'
+    setOrders([...orders])
   }
 
   function handleClickText(idx) {
     let target = orders.find((order, i) => (i === idx));
-    if (target.mode === 'c' && target.click === 0) {
+    if (target.mode === 'c' && target.firstClick) {
       target.message = ''
-      target.click++
+      target.firstClick = false
     }
     setOrders([...orders])
+  }
+
+  function handleEnter(event, idx) {
+    if (event.key === "Enter") {
+      handleApiSaveOrder(null, idx)
+    }
   }
 
   function handleTyping(event, idx) {
@@ -96,14 +109,15 @@ export default function OrderDialog({open, onClose, patient}) {
                 rows={2}
                 disabled={order.mode === 'r'}
                 onChange={(event) => handleTyping(event, idx)}
-                onClick={() => handleClickText(idx)}
+                onMouseDown={() => handleClickText(idx)}
+                onKeyDown={(event) => handleEnter(event, idx)}
               />
             </Grid>
             <Grid item xs={1}>
               <MyButton
                 mode={order.mode}
                 idx={idx}
-                onClick={order.mode === 'r' ? handleApiUpdateOrder : handleApiSaveOrder}/>
+                onClick={order.mode === 'r' ? handleChangeSymbol : handleApiSaveOrder}/>
             </Grid>
           </Grid>
         ))}
@@ -114,7 +128,7 @@ export default function OrderDialog({open, onClose, patient}) {
 
 const MyButton = (props) => {
   return props.mode === 'r' ? (
-    <IconButton color="secondary" {...props} onClick={(event) => props.onClick(event, props.idx)}>
+    <IconButton color="primary" {...props} onClick={(event) => props.onClick(event, props.idx)}>
       <Box id={props.id} sx={{fontSize: 30}}>
         <EditRoundedIcon id={props.id}/>
       </Box>

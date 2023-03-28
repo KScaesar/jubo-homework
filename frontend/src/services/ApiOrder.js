@@ -9,24 +9,22 @@ const ApiOrder = {
     return axios.get(API_URL_Order + `?patient_id=${patient_id}`)
       .then(res => (res.data.payload))
       .catch(err => {
-        console.log(err)
-        throw new Error(`Error in ApiOrder.QueryOrderList: ${err.message}`);
+        throw new Error(`Error in ApiOrder.QueryOrderList: ${err.message}: ${err.response.data.msg}`);
       });
   },
 
   CreateOrder(dto) {
     return axios.post(API_URL_Order, dto, {headers: {'Content-Type': 'application/json'}})
+      .then(res => (res.data.payload.id))
       .catch(err => {
-        console.log(err)
-        throw new Error(`Error in ApiOrder.CreateOrder: ${err.message}`);
+        throw new Error(`Error in ApiOrder.CreateOrder: ${err.message}: ${err.response.data.msg}`);
       });
   },
 
-  UpdateOrderInfo({id, dto}) {
-    return axios.patch(API_URL_Order + `/${id}`, dto, {headers: {'Content-Type': 'application/json'}})
+  UpdateOrderInfo(dto) {
+    return axios.patch(API_URL_Order + `/${dto.id}`, dto, {headers: {'Content-Type': 'application/json'}})
       .catch(err => {
-        console.log(err)
-        throw new Error(`Error in ApiOrder.UpdateOrder: ${err.message}`);
+        throw new Error(`Error in ApiOrder.UpdateOrder: ${err.message}: ${err.response.data.msg}`);
       });
   },
 };

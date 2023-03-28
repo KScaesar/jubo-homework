@@ -37,6 +37,7 @@ func GetOrSetCorrelationId(c *gin.Context) {
 func CorsMiddleware() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Access-Control-Allow-Headers", "Authorization, Content-Type"},
 		AllowCredentials: true,
 		MaxAge:           8 * time.Hour,

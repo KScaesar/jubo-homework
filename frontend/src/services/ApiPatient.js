@@ -9,8 +9,7 @@ const ApiPatient = {
     return axios.get(API_URL_Patient)
       .then(res => (res.data.payload))
       .catch(err => {
-        console.log(err)
-        throw new Error(`Error in ApiPatient.QueryPatientList: ${err.message}`);
+        throw new Error(`Error in ApiPatient.QueryPatientList: ${err.message}: ${err.response.data.msg}`);
       });
   },
 };
