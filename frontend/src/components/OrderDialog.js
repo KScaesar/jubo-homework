@@ -8,7 +8,6 @@ import ApiOrder from "@/services/ApiOrder";
 
 export default function OrderDialog({open, onClose, patient}) {
   const [orders, setOrders] = useState([]);
-  const [selectedOrderIdx, setSelectedOrderIdx] = useState(-1)
 
   useEffect(() => {
     const go = async () => {
@@ -32,8 +31,28 @@ export default function OrderDialog({open, onClose, patient}) {
     setOrders([newOrder, ...orders]);
   };
 
-  const handleConfirmOrder = (id, msg) => {
+  const handleApiSaveOrder = (event, idx) => {
+    event.preventDefault()
+    let target = orders.find((order, i) => (i === idx));
+    if (target.mode === 'r') {
+      return
+    }
 
+    const mode = target.mode
+    target.mode = 'r'
+    const go = async () => {
+      if (mode === 'u') {
+        await ApiOrder.UpdateOrderInfo(target)
+      } else if (mode === 'c') {
+        await ApiOrder.CreateOrder(target)
+      }
+      setOrders([...orders])
+    }
+    go()
+  }
+
+  const handleApiUpdateOrder = (event, idx) => {
+    event.preventDefault()
   }
 
   function handleClickText(idx) {
@@ -52,7 +71,7 @@ export default function OrderDialog({open, onClose, patient}) {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth={true}>
+    <Dialog open={open} onClose={onClose} fullWidth={true} sx={{height: '100%'}}>
       <DialogTitle style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',}}>
         <Typography variant="p">{patient ? patient.name : ''}</Typography>
         <DialogActions>
@@ -64,7 +83,7 @@ export default function OrderDialog({open, onClose, patient}) {
           </IconButton>
         </DialogActions>
       </DialogTitle>
-      <DialogContent sx={{minHeight: '1000px'}}>
+      <DialogContent>
         {orders.map((order, idx) => (
           <Grid key={order.id} container spacing={2} alignItems="center" justifyContent="center">
             <Grid item xs={11}>
@@ -81,7 +100,10 @@ export default function OrderDialog({open, onClose, patient}) {
               />
             </Grid>
             <Grid item xs={1}>
-              <MyButton mode={order.mode}/>
+              <MyButton
+                mode={order.mode}
+                idx={idx}
+                onClick={order.mode === 'r' ? handleApiUpdateOrder : handleApiSaveOrder}/>
             </Grid>
           </Grid>
         ))}
@@ -92,12 +114,14 @@ export default function OrderDialog({open, onClose, patient}) {
 
 const MyButton = (props) => {
   return props.mode === 'r' ? (
-    <IconButton color="primary"  {...props}>
-      <Box component={EditRoundedIcon} sx={{fontSize: 30}}/>
+    <IconButton color="secondary" {...props} onClick={(event) => props.onClick(event, props.idx)}>
+      <Box id={props.id} sx={{fontSize: 30}}>
+        <EditRoundedIcon id={props.id}/>
+      </Box>
     </IconButton>
   ) : (
-    <IconButton color="secondary"  {...props}>
+    <IconButton color="secondary" {...props} onClick={(event) => props.onClick(event, props.idx)}>
       <Box component={CheckCircleRoundedIcon} sx={{fontSize: 30}}/>
     </IconButton>
-  )
+  );
 };

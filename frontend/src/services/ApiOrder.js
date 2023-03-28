@@ -15,7 +15,7 @@ const ApiOrder = {
   },
 
   CreateOrder(dto) {
-    return axios.post(API_URL_Order, dto)
+    return axios.post(API_URL_Order, dto, {headers: {'Content-Type': 'application/json'}})
       .catch(err => {
         console.log(err)
         throw new Error(`Error in ApiOrder.CreateOrder: ${err.message}`);
@@ -23,7 +23,7 @@ const ApiOrder = {
   },
 
   UpdateOrderInfo({id, dto}) {
-    return axios.patch(API_URL_Order+`/${id}`, dto)
+    return axios.patch(API_URL_Order + `/${id}`, dto, {headers: {'Content-Type': 'application/json'}})
       .catch(err => {
         console.log(err)
         throw new Error(`Error in ApiOrder.UpdateOrder: ${err.message}`);

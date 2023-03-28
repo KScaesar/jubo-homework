@@ -34,7 +34,7 @@ const PatientsList = () => {
 
   return (
     <div>
-      <List>
+      <List sx={{backgroundColor: '#f0f0f0'}}>
         {patients.map((patient) => (
           <ListItemButton key={patient.id} onClick={() => handlePatientClick(patient)}>
             <ListItemIcon>
