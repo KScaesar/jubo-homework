@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import ApiPatient from "@/services/ApiPatient";
+import OrderDialog from "@/components/OrderDialog";
 
 const PatientsList = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -17,11 +18,12 @@ const PatientsList = () => {
         console.error(error);
       }
     }
+
     go();
   }, [])
 
   const handlePatientClick = (patient) => {
-    setSelectedPatient(patient);
+    setSelectedPatient({...patient});
     setDialogOpen(true);
   };
 
@@ -42,6 +44,14 @@ const PatientsList = () => {
           </ListItemButton>
         ))}
       </List>
+      {selectedPatient ?
+        <OrderDialog
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          patient={selectedPatient}
+        /> :
+        null
+      }
     </div>
   );
 };

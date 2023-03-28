@@ -30,7 +30,7 @@ func NewDtoListResponse[T any](list []T, page *DtoPageResponse) DtoListResponse[
 }
 
 type DtoListResponse[T any] struct {
-	PageInfo *DtoPageResponse `json:"page_info"`
+	PageInfo *DtoPageResponse `json:"page_info,omitempty"`
 	List     []T              `json:"list"`
 }
 

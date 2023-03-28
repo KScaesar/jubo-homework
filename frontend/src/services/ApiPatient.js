@@ -10,7 +10,7 @@ const ApiPatient = {
       .then(res => (res.data.payload))
       .catch(err => {
         console.log(err)
-        throw new Error(`Error in ApiPatient.QueryList: ${err.message}`);
+        throw new Error(`Error in ApiPatient.QueryPatientList: ${err.message}`);
       });
   },
 };
