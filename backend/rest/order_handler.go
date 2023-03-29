@@ -56,17 +56,18 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	}
 	ctx := c.Request.Context()
 
+	var id string
 	if err := h.txFactory.CreateTransaction(ctx).AutoCommit(
-		func(ctx context.Context) error {
-			_, err := h.svc.CreateOrder(ctx, &dto)
-			return err
+		func(ctx context.Context) (err error) {
+			id, err = h.svc.CreateOrder(ctx, &dto)
+			return
 		},
 	); err != nil {
 		ReplyErrorResponse(c, err)
 		return
 	}
 
-	ReplySuccessResponse(c, http.StatusOK, nil)
+	ReplySuccessResponse(c, http.StatusOK, gin.H{"id": id})
 }
 
 func (h *OrderHandler) UpdateOrderInfo(c *gin.Context) {

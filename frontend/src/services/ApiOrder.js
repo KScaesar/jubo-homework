@@ -1,0 +1,30 @@
+import axios from 'axios';
+
+const API_URL_Order = process.env.NEXT_PUBLIC_API_URL + '/orders';
+
+const ApiOrder = {
+  QueryOrderList(patient_id) {
+    return axios.get(API_URL_Order + `?patient_id=${patient_id}`)
+      .then(res => (res.data.payload))
+      .catch(err => {
+        throw new Error(`Error in ApiOrder.QueryOrderList: ${err.message}: ${err.response.data.msg}`);
+      });
+  },
+
+  CreateOrder(dto) {
+    return axios.post(API_URL_Order, dto, {headers: {'Content-Type': 'application/json'}})
+      .then(res => (res.data.payload.id))
+      .catch(err => {
+        throw new Error(`Error in ApiOrder.CreateOrder: ${err.message}: ${err.response.data.msg}`);
+      });
+  },
+
+  UpdateOrderInfo(dto) {
+    return axios.patch(API_URL_Order + `/${dto.id}`, dto, {headers: {'Content-Type': 'application/json'}})
+      .catch(err => {
+        throw new Error(`Error in ApiOrder.UpdateOrder: ${err.message}: ${err.response.data.msg}`);
+      });
+  },
+};
+
+export default ApiOrder;

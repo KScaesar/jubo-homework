@@ -24,14 +24,14 @@ func NewDtoListResponse[T any](list []T, page *DtoPageResponse) DtoListResponse[
 		list = make([]T, 0)
 	}
 	return DtoListResponse[T]{
-		DtoPageResponse: page,
-		List:            list,
+		PageInfo: page,
+		List:     list,
 	}
 }
 
 type DtoListResponse[T any] struct {
-	*DtoPageResponse
-	List []T `json:"list"`
+	PageInfo *DtoPageResponse `json:"page_info,omitempty"`
+	List     []T              `json:"list"`
 }
 
 // sort

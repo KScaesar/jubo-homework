@@ -4,7 +4,9 @@ FROM golang:1.20-buster AS builder
 LABEL stage=builder
 WORKDIR /build
 
-COPY . .
+COPY ./backend ./backend
+COPY ./go.mod .
+COPY ./go.sum .
 RUN go mod download && CGO_ENABLED=0 go build -trimpath -o ./server ./backend/server.go
 
 # Second stage: Copy the binary from the builder stage and run it
