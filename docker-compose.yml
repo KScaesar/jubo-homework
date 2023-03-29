@@ -15,9 +15,9 @@ services:
       # - /etc/localtime:/etc/localtime:ro
       - data:/var/lib/postgresql/data
 
-  jubo-server:
+  jubo-server1:
      image: "x246libra/jubo-homework-backend:v1.0"
-     container_name: jubo-server
+     container_name: jubo-server1
      restart: always
      environment:
        - WorkDir=/app
@@ -25,7 +25,20 @@ services:
      ports:
        - "8888:8888"
 #     volumes:
-#       - .backend/configs:/app/backend/configs
+#       - ./backend/configs:/app/backend/configs
+     depends_on:
+       - jubo-rdb
+  jubo-server2:
+     image: "x246libra/jubo-homework-backend:v1.0"
+     container_name: jubo-server2
+     restart: always
+     environment:
+       - WorkDir=/app
+       - ConfigPath=./configs/container.yaml
+     ports:
+       - "8889:8888"
+#     volumes:
+#       - ./backend/configs:/app/backend/configs
      depends_on:
        - jubo-rdb
 
@@ -39,9 +52,34 @@ services:
      ports:
        - "3001:3001"
 #     volumes:
-#       - .frontend/.env.production:/app/.env.production
+#       - ./frontend/.env.production:/app/.env.production
      depends_on:
-       - jubo-server
+       - jubo-server1
+       - jubo-server2
+
+  jubo-nginx:
+    image: nginx:1.22.1
+    container_name: jubo-nginx
+    ports:
+      - "80:80"
+    command: [ nginx, '-g', 'daemon off;' ]
+    environment:
+      - NGINX_PORT=80
+      - NGINX_HOST=caesar.nginx.com
+
+      # https://www.digitalocean.com/community/tools/nginx?global.app.lang=zhTW
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/util:/etc/nginx/util
+      - ./nginx/conf.d:/etc/nginx/conf.d
+
+      - ./frontend/public:/home/public
+      # - ./frontend/.next:/home/.next
+
+    depends_on:
+        - jubo-server1
+        - jubo-server2
+        - jubo-web
 
 volumes:
   data:

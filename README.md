@@ -20,9 +20,14 @@ bash project.sh -c
 bash project.sh -s
 
 # website address
-http://localhost:3001 
+http://localhost
 or 
+http://localhost:3001
 ```
+
+## 系統架構
+
+![system](./system.png)
 
 ## 使用技術
 
@@ -33,7 +38,8 @@ ulid PostgreSQL
 
 2 frontend:  
 react Next.js axios  
-MUI(material-ui)
+MUI(material-ui)  
+nginx
 
 ## demo
 
@@ -166,4 +172,21 @@ curl -X PATCH --location "http://localhost:8888/v1/api/orders/01GWFCJQAY4QCSXJ1W
 -H "Accept: application/json" \
 -d '{ "message": "血糖超過120，建議施打 10 單位胰島素" }'
 
+```
+
+## note
+
+單獨 啟動 或 停止  
+docker-compose 特定服務  
+
+```bash
+# docker-compose up <service-name>
+docker-compose -p jubo up -d jubo-rdb
+
+docker-compose -p jubo stop jubo-rdb
+```
+
+import testdata.sql
+```bash
+docker exec -i jubo-rdb psql -U caesar -d test <./testdata.sql
 ```

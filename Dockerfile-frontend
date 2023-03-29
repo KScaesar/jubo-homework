@@ -1,5 +1,5 @@
 # ref:
-#https://github.com/vercel/next.js/tree/canary/examples/with-docker-multi-env
+# https://github.com/vercel/next.js/tree/canary/examples/with-docker-multi-env
 
 FROM node:16-alpine AS base
 
@@ -27,29 +27,28 @@ WORKDIR /build
 
 COPY --from=deps /base/node_modules ./node_modules
 COPY ./frontend .
-COPY ./frontend/.env.production .env.production
 RUN yarn build
+
 
 # 3. Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
-
-COPY --from=builder /build/public ./public
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /build/.next/standalone ./
+
+# 靜態內容, 可以交給 nginx 進行處理
 COPY --from=builder --chown=nextjs:nodejs /build/.next/static ./.next/static
+COPY --from=builder /build/public ./public
 
 USER nextjs
 
-EXPOSE 3001
-
+ENV NODE_ENV=production
 ENV PORT 3001
 
+EXPOSE 3001
 CMD ["node", "server.js"]

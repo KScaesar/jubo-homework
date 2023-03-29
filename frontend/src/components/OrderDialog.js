@@ -51,7 +51,6 @@ export default function OrderDialog({open, onClose, patient}) {
       mode: 'c',
       firstClick: true,
     };
-    newOrder.mode = 'c'
     setOrders([newOrder, ...orders]);
   };
 
@@ -102,6 +101,7 @@ export default function OrderDialog({open, onClose, patient}) {
             <Grid item xs={11}>
               <TextField
                 key={order.id}
+                InputProps={order.firstClick ? {style: { color: '#7B7B7B' }} : {style: { color: 'black' }}}
                 value={order.message}
                 margin="normal"
                 fullWidth
