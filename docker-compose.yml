@@ -19,23 +19,29 @@ services:
      image: "x246libra/jubo-homework-backend:v1.0"
      container_name: jubo-server
      restart: always
+     environment:
+       - WorkDir=/app
+       - ConfigPath=./configs/container.yaml
      ports:
        - "8888:8888"
- #    volumes:
- #      - .backend/configs:/app/backend/configs
+#     volumes:
+#       - .backend/configs:/app/backend/configs
      depends_on:
        - jubo-rdb
 
-#   jubo-web:
-#     image: ""
-#     container_name: jubo-web
-#     restart: always
-#     ports:
-#       - "80:80"
-# #    volumes:
-# #      - .frontend/configs:/app/frontend/configs
-#     depends_on:
-#       - jubo-server
+  jubo-web:
+     image: "x246libra/jubo-homework-frontend:v1.0"
+     container_name: jubo-web
+     restart: always
+     environment:
+       - NODE_ENV=production
+       - PORT=3001
+     ports:
+       - "3001:3001"
+#     volumes:
+#       - .frontend/.env.production:/app/.env.production
+     depends_on:
+       - jubo-server
 
 volumes:
   data:

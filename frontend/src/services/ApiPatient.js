@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8888/v1/api';
-
-let API_URL_Patient = API_URL + '/patients';
+const API_URL_Patient = process.env.NEXT_PUBLIC_API_URL + '/patients';
 
 const ApiPatient = {
   QueryPatientList() {

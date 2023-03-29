@@ -25,3 +25,5 @@ export default function Home() {
     </>
   );
 }
+
+// https://github.com/vercel/next.js/tree/canary/examples/environment-variables

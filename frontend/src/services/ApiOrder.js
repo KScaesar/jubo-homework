@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8888/v1/api';
-
-let API_URL_Order = API_URL + '/orders';
+const API_URL_Order = process.env.NEXT_PUBLIC_API_URL + '/orders';
 
 const ApiOrder = {
   QueryOrderList(patient_id) {

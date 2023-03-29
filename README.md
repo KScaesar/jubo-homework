@@ -10,6 +10,8 @@
 需要能夠執行 bash, docker, docker-compose  
 才能啟動服務  
 
+docker image 如果失效, 文件下方有 docker build 用法  
+
 ```bash
 # start service in container
 bash project.sh -c
@@ -18,8 +20,20 @@ bash project.sh -c
 bash project.sh -s
 
 # website address
-http://localhost:3000
+http://localhost:3001 
+or 
 ```
+
+## 使用技術
+
+1 backend:  
+golang gin gorm  
+wire testtify go-playground  
+ulid PostgreSQL
+
+2 frontend:  
+react Next.js axios  
+MUI(material-ui)
 
 ## demo
 
@@ -28,59 +42,13 @@ http://localhost:3000
 ## 雜談
 
 1  
-變更了作業敘述中的資料結構  
-
-若資料庫 schema 採用原先的資料結構  
-實現 order, patient 的 query list 功能  
-比較麻煩  
-
-patient:order 的關係  
-應該是 1:N  
-所以我覺得  
-應該讓 order 有 patient.id 比較合理  
-
-```
-// 原本的
-patients: 
-{
-  Id: “1”,
-  Name: “小民”,
-  OrderId: ‘1’,
-}
-
-orders: 
-{
-  Id: ‘1’,
-  Message: ‘超過120請施打8u’,
-}
-
-// 修改後
-patients: 
-{
-  "id": "01GWFC7ZXTG9ZH6GPXFKJM0PNT",
-  "name": "小民"
-}
-
-orders: 
-{
-  "id": "01GWFCJQAY4QCSXJ1W1SF3ACJA",
-  "message": "血壓略高，要按時吃藥",
-  "patient_id": "01GWFC7ZXTG9ZH6GPXFKJM0PNT"
-}
-```
-
-2  
-把 config, env 加入到 git  
-作業性質, 請見諒  
-
-3  
 Backend project layout:  
 主要依照 整潔架構分為四層  
-rest, application, domain, infra  
+rest, application, domain, infra
 
 ioc 依賴注入 組合元件的邏輯  
 util 無關 domain 商業, 可以和多個 project 共用的技術元件  
-server.go 是程式進入點  
+server.go 是程式進入點
 ```
 ./jubo-homework/backend$ tree -L 1
 .
@@ -114,22 +82,64 @@ services 呼叫 backend api
     │     └── ApiPatient.js
 ```
 
-## 使用技術
+2  
+把 config, env 加入到 git  
+作業性質, 請見諒  
 
-1 backend:  
-	golang gin gorm  
-	wire testtify go-playground  
-	ulid PostgreSQL  
+3  
+變更了作業敘述中的資料結構
 
-2 frontend:  
-	react Next.js axios  
-	MUI(material-ui)  
+若資料庫 schema 採用原先的資料結構  
+實現 order, patient 的 query list 功能  
+比較麻煩
+
+patient:order 的關係是 1:N  
+所以我覺得  
+應該讓 order 有 patient.id 比較合理
+
+```
+// 原本的
+patients: 
+{
+  Id: “1”,
+  Name: “小民”,
+  OrderId: ‘1’,
+}
+
+orders: 
+{
+  Id: ‘1’,
+  Message: ‘超過120請施打8u’,
+}
+
+- - -
+
+// 修改後
+patients: 
+{
+  "id": "01GWFC7ZXTG9ZH6GPXFKJM0PNT",
+  "name": "小民"
+}
+
+orders: 
+{
+  "id": "01GWFCJQAY4QCSXJ1W1SF3ACJA",
+  "message": "血壓略高，要按時吃藥",
+  "patient_id": "01GWFC7ZXTG9ZH6GPXFKJM0PNT"
+}
+```
 
 # Dockerfile
 
 ```bash
 # backend
-docker build -f Dockerfile-backend -t x246libra/jubo-homework-backend:v1.0 . && \
+./jubo-homework$ docker build -f Dockerfile-backend -t x246libra/jubo-homework-backend:v1.0 . && \
+    docker rmi `docker images --filter label=stage=builder -q`
+
+# frontend
+./jubo-homework$ npm --prefix ./frontend run build
+
+./jubo-homework$ docker build -f Dockerfile-frontend -t x246libra/jubo-homework-frontend:v1.0 . && \
     docker rmi `docker images --filter label=stage=builder -q`
 ```
 
