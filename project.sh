@@ -100,6 +100,8 @@ while getopts "cls" opt; do
             docker exec jubo-rdb psql -U caesar -d test -c '\l'
 
         docker exec -i jubo-rdb psql -U caesar -d test <./testdata.sql 2>&1
+
+        echo -e "\n Project Website: \e[4m\e[33mhttp://localhost/\e[0m \n"
         ;;
 
     l) # local
