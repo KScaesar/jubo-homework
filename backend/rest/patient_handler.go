@@ -18,7 +18,7 @@ type PatientHandler struct {
 }
 
 func (h *PatientHandler) QueryPatientList(c *gin.Context) {
-	var dto domain.DtoQryPatientParam
+	var dto domain.QryPatientParam
 	if !BindQueryStringOrPostFormRequest(c, &dto) {
 		return
 	}

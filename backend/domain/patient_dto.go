@@ -2,8 +2,8 @@ package domain
 
 import "github.com/KScaesar/jubo-homework/backend/util"
 
-func TransformPatientModel(patient *Patient) DtoPatientResponse {
-	return DtoPatientResponse{
+func TransformPatientModel(patient *Patient) PatientResponse {
+	return PatientResponse{
 		Id:   patient.Id,
 		Name: patient.Name,
 	}
@@ -11,39 +11,26 @@ func TransformPatientModel(patient *Patient) DtoPatientResponse {
 
 // read dto
 
-type DtoPatientResponse struct {
+type PatientResponse struct {
 	Id   string `json:"id" gorm:"column:id"`
 	Name string `json:"name" gorm:"column:name"`
 }
 
-type DtoQryPatientParam struct {
-	DtoFilterPatientParam
-	DtoSortPatientParam
-	util.DtoPageParam
+type QryPatientParam struct {
+	FilterPatientParam
+	util.SortParam
+	util.PageParam
 }
 
-type DtoFilterPatientParam struct {
-	Name *string `form:"name" rdb:"name = ?"`
-}
-
-type DtoSortPatientParam struct {
-	SortCreatedAt util.SortKind `form:"sort_created_at" rdb:"created_at" validate:"sort"`
-}
-
-func (dto *DtoSortPatientParam) SetDefault() {
-	if dto.SortCreatedAt == "" {
-		dto.SortCreatedAt = util.SortDesc
+func (d *QryPatientParam) PreProcess(isPagination bool) {
+	d.SortParam.SetDefaultIfInvalid("created_at", util.SortDesc)
+	if isPagination {
+		d.PageParam.SetDefaultIfInvalid()
+		return
 	}
+	d.PageParam.SetWithoutPagination()
 }
 
-func (d *DtoQryPatientParam) FilterParam() any {
-	return &d.DtoFilterPatientParam
-}
-
-func (d *DtoQryPatientParam) SortParam() any {
-	return &d.DtoSortPatientParam
-}
-
-func (d *DtoQryPatientParam) PageParam() util.DtoPageParam {
-	return d.DtoPageParam
+type FilterPatientParam struct {
+	Name *string `form:"name" rdb:"name = ?"`
 }

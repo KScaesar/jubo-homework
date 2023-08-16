@@ -1,40 +1,68 @@
 package util
 
 import (
-	"reflect"
 	"strings"
-
-	"github.com/fatih/structs"
 
 	"github.com/KScaesar/jubo-homework/backend/util/errors"
 )
 
-// list query param
-
-type DtoQryParam interface {
-	FilterParam() any
-	SortParam() any
-	PageParam() DtoPageParam
-}
-
 // list response
 
-func NewDtoListResponse[T any](list []T, page *DtoPageResponse) DtoListResponse[T] {
+func NewListResponseWithPagination[T any](list []T, page *PageResponse) ListResponse[T] {
 	if list == nil {
 		list = make([]T, 0)
 	}
-	return DtoListResponse[T]{
+	return ListResponse[T]{
 		PageInfo: page,
 		List:     list,
 	}
 }
 
-type DtoListResponse[T any] struct {
-	PageInfo *DtoPageResponse `json:"page_info,omitempty"`
-	List     []T              `json:"list"`
+func NewListResponseWithoutPagination[T any](list []T) ListResponse[T] {
+	if list == nil {
+		list = make([]T, 0)
+	}
+	return ListResponse[T]{
+		PageInfo: nil,
+		List:     list,
+	}
+}
+
+type ListResponse[T any] struct {
+	PageInfo *PageResponse `json:"page_info,omitempty"`
+	List     []T           `json:"list"`
+}
+
+func (l *ListResponse[T]) IsPagination() bool {
+	return l.PageInfo != nil
 }
 
 // sort
+
+type SortParam struct {
+	SortKey string   `json:"sort_key" form:"sort_key"`
+	SortV   SortKind `json:"sort_v" form:"sort_v" validate:"sort"`
+}
+
+func (dto *SortParam) SetDefaultIfInvalid(sortKey string, sortV SortKind) {
+	if dto.SortKey == "" {
+		dto.SortKey = sortKey
+	}
+	if dto.SortV == SortDesc || dto.SortV == SortAsc {
+		return
+	}
+	dto.SortV = sortV
+}
+
+var sortBuilder = strings.Builder{}
+
+func (dto SortParam) KeyValueString() string {
+	defer sortBuilder.Reset()
+	sortBuilder.WriteString(dto.SortKey)
+	sortBuilder.WriteString(" ")
+	sortBuilder.WriteString(string(dto.SortV))
+	return sortBuilder.String()
+}
 
 const (
 	SortNone SortKind = ""
@@ -60,101 +88,67 @@ func (s *SortKind) UnmarshalText(text []byte) error {
 	return s.Validate()
 }
 
-// ValidateSortParam
-//
-// SortParam example:
-//
-//	type DtoSortUserParam struct {
-//		SortUpdatedAt SortKind `form:"sort_updated_at" rdb:"updated_at" validate:"sort"`
-//		SortCreatedAt SortKind `form:"sort_created_at" rdb:"created_at" validate:"sort"`
-//	}
-func ValidateSortParam(sort any) error {
-	if sort == nil {
-		return nil
-	}
-
-	fields := structs.New(sort).Fields()
-
-	for _, field := range fields {
-		if field.IsZero() {
-			continue
-		}
-
-		var value any
-		if field.Kind() == reflect.Pointer {
-			value = reflect.ValueOf(field.Value()).Elem().Interface()
-		} else {
-			value = field.Value()
-		}
-
-		obj, ok := value.(SortKind)
-		if !ok {
-			continue
-		}
-
-		err := obj.Validate()
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // page
 
-type DtoPageParam struct {
-	Page *int64 `json:"page" form:"page"`
-	Size *int64 `json:"size" form:"size"`
+func NewWithoutPagination() PageParam {
+	return PageParam{}
 }
 
-func (p DtoPageParam) RestrictedSize() bool {
-	return p.IsValueAssigned()
+type PageParam struct {
+	Page uint64 `json:"page" form:"page"`
+	Size uint64 `json:"size" form:"size"`
 }
 
-func (p DtoPageParam) IsValueAssigned() bool {
-	return !(p.Page == nil && p.Size == nil)
-}
-
-func (p DtoPageParam) Validate() error {
-	if p.Page != nil && p.Size != nil && *p.Page > 0 && *p.Size > 0 {
+func (p PageParam) Validate() error {
+	if p.Page > 0 && p.Size > 0 {
 		return nil
 	}
-	return errors.WrapWithMessage(errors.ErrDeveloper, "page param is invalid")
+	return errors.WrapWithMessage(errors.ErrDeveloper, "page dto is invalid")
 }
 
-func (p *DtoPageParam) SetDefault(maxPageSize int64) {
-	var (
-		defaultPage int64 = 1
-		defaultSize int64 = 20
+func (p PageParam) IsPagination() bool {
+	return p.Page == 0 || p.Size == 0
+}
+
+func (p *PageParam) SetWithoutPagination() {
+	p.Page = 0
+	p.Size = 0
+}
+
+func (p *PageParam) SetDefaultIfInvalid() {
+	const (
+		defaultMax  = 3000
+		defaultSize = 20
+	)
+	p.SetDefaultAndMaxSizeIfInvalid(defaultSize, defaultMax)
+}
+
+func (p *PageParam) SetDefaultAndMaxSizeIfInvalid(defaultSize, maxPageSize uint64) {
+	const (
+		defaultPage = 1
 	)
 
 	err := p.Validate()
 	if err != nil {
-		p.Page = &defaultPage
-		p.Size = &defaultSize
+		p.Page = defaultPage
+		p.Size = defaultSize
 		return
 	}
 
-	if maxPageSize > 0 && *p.Size > maxPageSize {
-		*p.Size = maxPageSize
+	if p.Size > maxPageSize {
+		p.Size = maxPageSize
 	}
 }
 
-func (p DtoPageParam) OffsetOrSkip() int64 {
-	return (*p.Page - 1) * (*p.Size)
+func (p PageParam) OffsetOrSkip() int64 {
+	return int64((p.Page - 1) * (p.Size))
 }
 
-func NewDtoPageResponse(param DtoPageParam, totalSize int64) (*DtoPageResponse, error) {
-	err := param.Validate()
-	if err != nil {
-		return nil, err
-	}
+func NewPageResponse(param PageParam, totalSize uint64) PageResponse {
+	quotient := totalSize / param.Size
+	remainder := totalSize % param.Size
 
-	quotient := totalSize / *param.Size
-	remainder := totalSize % *param.Size
-
-	var totalPage int64
+	var totalPage uint64
 	switch {
 	case quotient > 0 && remainder == 0:
 		totalPage = quotient
@@ -166,35 +160,35 @@ func NewDtoPageResponse(param DtoPageParam, totalSize int64) (*DtoPageResponse, 
 		totalPage = 1
 	}
 
-	var size int64
+	var size uint64
 	switch {
-	case totalPage > *param.Page:
-		size = *param.Size
+	case totalPage > param.Page:
+		size = param.Size
 
-	case totalPage == *param.Page && totalSize != 0 && remainder == 0:
-		size = *param.Size
+	case totalPage == param.Page && totalSize != 0 && remainder == 0:
+		size = param.Size
 
-	case totalPage == *param.Page && totalSize != 0 && remainder != 0:
+	case totalPage == param.Page && totalSize != 0 && remainder != 0:
 		size = remainder
 
-	case totalPage == *param.Page && totalSize == 0:
+	case totalPage == param.Page && totalSize == 0:
 		size = 0
 
-	case totalPage < *param.Page:
+	case totalPage < param.Page:
 		size = 0
 	}
 
-	return &DtoPageResponse{
-		TotalPage: &totalPage,
-		TotalSize: &totalSize,
+	return PageResponse{
+		TotalPage: totalPage,
+		TotalSize: totalSize,
 		Page:      param.Page,
-		Size:      &size,
-	}, nil
+		Size:      size,
+	}
 }
 
-type DtoPageResponse struct {
-	TotalPage *int64 `json:"total_page,omitempty"`
-	TotalSize *int64 `json:"total_size,omitempty"`
-	Page      *int64 `json:"page,omitempty"`
-	Size      *int64 `json:"size,omitempty"`
+type PageResponse struct {
+	TotalPage uint64 `json:"total_page"`
+	TotalSize uint64 `json:"total_size"`
+	Page      uint64 `json:"page"`
+	Size      uint64 `json:"size"`
 }

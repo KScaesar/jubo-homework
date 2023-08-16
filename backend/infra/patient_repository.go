@@ -23,16 +23,21 @@ type PatientRepository struct {
 	db *database.WrapperGorm
 }
 
-func (repo *PatientRepository) QueryPatientList(ctx context.Context, dto *domain.DtoQryPatientParam) (util.DtoListResponse[domain.DtoPatientResponse], error) {
+func (repo *PatientRepository) QueryPatientList(
+	ctx context.Context,
+	dto *domain.QryPatientParam,
+) (util.ListResponse[domain.PatientResponse], error) {
 	db := repo.db.ChooseProcessor(ctx)
-
-	if dto == nil {
-		dto = &domain.DtoQryPatientParam{}
-	}
-	return database.GormQueryListFromSingleTable[domain.DtoPatientResponse](db, PatientTableName, dto)
+	db = db.Table(PatientTableName)
+	return database.GormQueryListWithPagination[domain.PatientResponse](
+		db,
+		dto.FilterPatientParam,
+		dto.PageParam,
+		dto.SortParam,
+	)
 }
 
-func (repo *PatientRepository) QueryPatientById(ctx context.Context, id string) (patient domain.DtoPatientResponse, err error) {
+func (repo *PatientRepository) QueryPatientById(ctx context.Context, id string) (patient domain.PatientResponse, err error) {
 	db := repo.db.ChooseProcessor(ctx)
 
 	err = db.Table(PatientTableName).Where("id = ?", id).First(&patient).Error

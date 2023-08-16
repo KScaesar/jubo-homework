@@ -21,7 +21,7 @@ type OrderHandler struct {
 }
 
 func (h *OrderHandler) QueryOrderList(c *gin.Context) {
-	var dto domain.DtoQryOrderParam
+	var dto domain.QryOrderParam
 	if !BindQueryStringOrPostFormRequest(c, &dto) {
 		return
 	}
@@ -50,7 +50,7 @@ func (h *OrderHandler) QueryOrderById(c *gin.Context) {
 }
 
 func (h *OrderHandler) CreateOrder(c *gin.Context) {
-	var dto domain.DtoCreateOrder
+	var dto domain.CreateOrderCmd
 	if !BindJsonRequest(c, &dto) {
 		return
 	}
@@ -71,7 +71,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 }
 
 func (h *OrderHandler) UpdateOrderInfo(c *gin.Context) {
-	var dto domain.DtoUpdateOrderInfo
+	var dto domain.UpdateOrderInfoCmd
 	if !BindJsonRequest(c, &dto) {
 		return
 	}

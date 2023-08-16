@@ -13,12 +13,12 @@ func ExtractCustomError(err error) (CustomError, bool) {
 	return *ErrUnknown3rdParty, false
 }
 
-func Join3rdPartyWithMsg(myErr error, thirdPartyErr error, msg string, args ...any) error {
-	return fmt.Errorf("%v: %w: %w", fmt.Sprintf(msg, args...), thirdPartyErr, myErr)
+func Join3rdPartyWithMsg(myErr error, Err3rd error, msg string, args ...any) error {
+	return fmt.Errorf("%v: %w: %w", fmt.Sprintf(msg, args...), Err3rd, myErr)
 }
 
-func Join3rdParty(myErr error, thirdPartyErr error) error {
-	return fmt.Errorf("%w: %w", thirdPartyErr, myErr)
+func Join3rdParty(myErr error, Err3rd error) error {
+	return fmt.Errorf("%w: %w", Err3rd, myErr)
 }
 
 func WrapWithMessage(myErr error, msg string, args ...any) error {

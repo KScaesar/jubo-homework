@@ -8,7 +8,7 @@ import (
 )
 
 type PatientService interface {
-	QueryPatientList(ctx context.Context, dto *domain.DtoQryPatientParam) (util.DtoListResponse[domain.DtoPatientResponse], error)
+	QueryPatientList(ctx context.Context, dto *domain.QryPatientParam) (util.ListResponse[domain.PatientResponse], error)
 }
 
 func NewPatientUseCase(repo domain.PatientRepo) *PatientUseCase {
@@ -19,8 +19,11 @@ type PatientUseCase struct {
 	repo domain.PatientRepo
 }
 
-func (uc *PatientUseCase) QueryPatientList(ctx context.Context, dto *domain.DtoQryPatientParam) (util.DtoListResponse[domain.DtoPatientResponse], error) {
-	dto.DtoPageParam.SetDefault(1000)
-	dto.DtoSortPatientParam.SetDefault()
+func (uc *PatientUseCase) QueryPatientList(
+	ctx context.Context, dto *domain.QryPatientParam,
+) (
+	util.ListResponse[domain.PatientResponse], error,
+) {
+	dto.PreProcess(true)
 	return uc.repo.QueryPatientList(ctx, dto)
 }

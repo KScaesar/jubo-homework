@@ -8,10 +8,10 @@ import (
 )
 
 type OrderService interface {
-	QueryOrderList(ctx context.Context, dto *domain.DtoQryOrderParam) (util.DtoListResponse[domain.DtoOrderResponse], error)
-	QueryOrderById(ctx context.Context, orderId string) (domain.DtoOrderResponse, error)
-	CreateOrder(ctx context.Context, dto *domain.DtoCreateOrder) (id string, err error)
-	UpdateOrderInfo(ctx context.Context, orderId string, dto *domain.DtoUpdateOrderInfo) error
+	QueryOrderList(ctx context.Context, dto *domain.QryOrderParam) (util.ListResponse[domain.OrderResponse], error)
+	QueryOrderById(ctx context.Context, orderId string) (domain.OrderResponse, error)
+	CreateOrder(ctx context.Context, dto *domain.CreateOrderCmd) (id string, err error)
+	UpdateOrderInfo(ctx context.Context, orderId string, dto *domain.UpdateOrderInfoCmd) error
 }
 
 func NewOrderUseCase(orderRepo domain.OrderRepo, patientRepo domain.PatientRepo) *OrderUseCase {
@@ -26,16 +26,20 @@ type OrderUseCase struct {
 	patientRepo domain.PatientRepo
 }
 
-func (uc *OrderUseCase) QueryOrderList(ctx context.Context, dto *domain.DtoQryOrderParam) (util.DtoListResponse[domain.DtoOrderResponse], error) {
-	dto.DtoSortOrderParam.SetDefault()
+func (uc *OrderUseCase) QueryOrderList(
+	ctx context.Context, dto *domain.QryOrderParam,
+) (
+	util.ListResponse[domain.OrderResponse], error,
+) {
+	dto.PreProcess(false)
 	return uc.orderRepo.QueryOrderList(ctx, dto)
 }
 
-func (uc *OrderUseCase) QueryOrderById(ctx context.Context, orderId string) (domain.DtoOrderResponse, error) {
+func (uc *OrderUseCase) QueryOrderById(ctx context.Context, orderId string) (domain.OrderResponse, error) {
 	return uc.orderRepo.QueryOrderById(ctx, orderId)
 }
 
-func (uc *OrderUseCase) CreateOrder(ctx context.Context, dto *domain.DtoCreateOrder) (string, error) {
+func (uc *OrderUseCase) CreateOrder(ctx context.Context, dto *domain.CreateOrderCmd) (string, error) {
 	_, err := uc.patientRepo.QueryPatientById(ctx, dto.PatientId)
 	if err != nil {
 		return "", err
@@ -54,7 +58,7 @@ func (uc *OrderUseCase) CreateOrder(ctx context.Context, dto *domain.DtoCreateOr
 	return order.Id, nil
 }
 
-func (uc *OrderUseCase) UpdateOrderInfo(ctx context.Context, orderId string, dto *domain.DtoUpdateOrderInfo) error {
+func (uc *OrderUseCase) UpdateOrderInfo(ctx context.Context, orderId string, dto *domain.UpdateOrderInfoCmd) error {
 	order, err := uc.orderRepo.LockOrderById(ctx, orderId)
 	if err != nil {
 		return err

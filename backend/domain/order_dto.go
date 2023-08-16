@@ -4,8 +4,8 @@ import (
 	"github.com/KScaesar/jubo-homework/backend/util"
 )
 
-func TransformOrderModel(order *Order) DtoOrderResponse {
-	return DtoOrderResponse{
+func TransformOrderModel(order *Order) OrderResponse {
+	return OrderResponse{
 		Id:        order.Id,
 		Message:   order.Message,
 		PatientId: order.PatientId,
@@ -14,51 +14,38 @@ func TransformOrderModel(order *Order) DtoOrderResponse {
 
 // read dto
 
-type DtoOrderResponse struct {
+type OrderResponse struct {
 	Id        string `json:"id" gorm:"column:id"`
 	Message   string `json:"message" gorm:"column:message"`
 	PatientId string `json:"patient_id" gorm:"column:patient_id"`
 }
 
-type DtoQryOrderParam struct {
-	DtoFilterOrderParam
-	DtoSortOrderParam
-	util.DtoPageParam
+type QryOrderParam struct {
+	FilterOrderParam
+	util.SortParam
+	util.PageParam
 }
 
-type DtoFilterOrderParam struct {
-	PatientId string `form:"patient_id" rdb:"patient_id = ?"`
-}
-
-type DtoSortOrderParam struct {
-	SortUpdatedAt util.SortKind `form:"sort_updated_at" rdb:"updated_at" validate:"sort"`
-}
-
-func (dto *DtoSortOrderParam) SetDefault() {
-	if dto.SortUpdatedAt == "" {
-		dto.SortUpdatedAt = util.SortDesc
+func (d *QryOrderParam) PreProcess(isPagination bool) {
+	d.SortParam.SetDefaultIfInvalid("updated_at", util.SortDesc)
+	if isPagination {
+		d.PageParam.SetDefaultIfInvalid()
+		return
 	}
+	d.PageParam.SetWithoutPagination()
 }
 
-func (d *DtoQryOrderParam) FilterParam() any {
-	return &d.DtoFilterOrderParam
-}
-
-func (d *DtoQryOrderParam) SortParam() any {
-	return &d.DtoSortOrderParam
-}
-
-func (d *DtoQryOrderParam) PageParam() util.DtoPageParam {
-	return d.DtoPageParam
+type FilterOrderParam struct {
+	PatientId string `form:"patient_id" rdb:"patient_id = ?"`
 }
 
 // write dto
 
-type DtoCreateOrder struct {
+type CreateOrderCmd struct {
 	Message   string `json:"message"`
 	PatientId string `json:"patient_id"`
 }
 
-type DtoUpdateOrderInfo struct {
+type UpdateOrderInfoCmd struct {
 	Message *string `json:"message"`
 }

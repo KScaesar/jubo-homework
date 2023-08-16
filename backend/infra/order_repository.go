@@ -23,16 +23,21 @@ type OrderRepository struct {
 	db *database.WrapperGorm
 }
 
-func (repo *OrderRepository) QueryOrderList(ctx context.Context, dto *domain.DtoQryOrderParam) (util.DtoListResponse[domain.DtoOrderResponse], error) {
+func (repo *OrderRepository) QueryOrderList(
+	ctx context.Context, dto *domain.QryOrderParam,
+) (
+	util.ListResponse[domain.OrderResponse], error,
+) {
 	db := repo.db.ChooseProcessor(ctx)
-
-	if dto == nil {
-		dto = &domain.DtoQryOrderParam{}
-	}
-	return database.GormQueryListFromSingleTable[domain.DtoOrderResponse](db, OrderTableName, dto)
+	db = db.Table(OrderTableName)
+	return database.GormQueryListWithoutPagination[domain.OrderResponse](
+		db,
+		dto.FilterOrderParam,
+		dto.SortParam,
+	)
 }
 
-func (repo *OrderRepository) QueryOrderById(ctx context.Context, id string) (order domain.DtoOrderResponse, err error) {
+func (repo *OrderRepository) QueryOrderById(ctx context.Context, id string) (order domain.OrderResponse, err error) {
 	db := repo.db.ChooseProcessor(ctx)
 
 	err = db.Table(OrderTableName).Where("id = ?", id).First(&order).Error

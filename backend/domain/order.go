@@ -9,15 +9,15 @@ import (
 )
 
 type OrderRepo interface {
-	QueryOrderList(ctx context.Context, dto *DtoQryOrderParam) (util.DtoListResponse[DtoOrderResponse], error)
-	QueryOrderById(ctx context.Context, orderId string) (order DtoOrderResponse, err error)
+	QueryOrderList(ctx context.Context, dto *QryOrderParam) (util.ListResponse[OrderResponse], error)
+	QueryOrderById(ctx context.Context, orderId string) (order OrderResponse, err error)
 	LockOrderById(ctx context.Context, orderId string) (order Order, err error)
 
 	CreateOrder(ctx context.Context, order *Order) error
 	UpdateOrder(ctx context.Context, order *Order) error
 }
 
-func NewOrder(dto *DtoCreateOrder) (Order, error) {
+func NewOrder(dto *CreateOrderCmd) (Order, error) {
 	id := util.NewUlid()
 	now := time.Now()
 
@@ -47,7 +47,7 @@ func (o *Order) Validate() error {
 	return nil
 }
 
-func (o *Order) UpdateInfo(dto *DtoUpdateOrderInfo) error {
+func (o *Order) UpdateInfo(dto *UpdateOrderInfoCmd) error {
 	if dto.Message != nil {
 		o.Message = *dto.Message
 	}

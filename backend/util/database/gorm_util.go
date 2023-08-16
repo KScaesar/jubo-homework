@@ -1,9 +1,6 @@
 package database
 
 import (
-	"fmt"
-	"reflect"
-
 	"github.com/fatih/structs"
 	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
@@ -57,86 +54,14 @@ func GormFilterDsl(filter interface{}) []func(db *gorm.DB) *gorm.DB {
 		}
 
 		sql := field.Tag("rdb")
-		where = append(where, func(db *gorm.DB) *gorm.DB {
-			return db.Where(sql, value)
-		})
+		where = append(
+			where, func(db *gorm.DB) *gorm.DB {
+				return db.Where(sql, value)
+			},
+		)
 	}
 
 	return where
-}
-
-func GormSortDsl(sort interface{}) []func(db *gorm.DB) *gorm.DB {
-	if sort == nil {
-		return nil
-	}
-
-	fields := structs.New(sort).Fields()
-	orderBy := make([]func(db *gorm.DB) *gorm.DB, 0, len(fields))
-
-	for _, field := range fields {
-		if field.IsZero() {
-			continue
-		}
-
-		var value any
-		if field.Kind() == reflect.Pointer {
-			value = reflect.ValueOf(field.Value()).Elem().Interface()
-		} else {
-			value = field.Value()
-		}
-
-		if field.IsEmbedded() {
-			embed := GormSortDsl(value)
-			orderBy = append(orderBy, embed...)
-			continue
-		}
-
-		sqlName := field.Tag("rdb")
-		orderBy = append(orderBy, func(db *gorm.DB) *gorm.DB {
-			return db.Order(fmt.Sprintf("%v %s", sqlName, value))
-		})
-	}
-
-	return orderBy
-}
-
-func GormPageDsl(
-	originDB *gorm.DB,
-	pageParam util.DtoPageParam,
-) (
-	modifiedDB *gorm.DB,
-	listBufferSize int64,
-	pageResponse *util.DtoPageResponse,
-	err error,
-) {
-	modifiedDB = originDB
-	const defaultBufferSize = 10
-	listBufferSize = defaultBufferSize
-
-	if !pageParam.RestrictedSize() {
-		return
-	}
-
-	err = pageParam.Validate()
-	if err != nil {
-		return
-	}
-
-	var totalSize int64
-	err = originDB.Count(&totalSize).Error
-	if err != nil {
-		err = GormError(err)
-		return
-	}
-
-	listBufferSize = *pageParam.Size
-	pageResponse, _ = util.NewDtoPageResponse(pageParam, totalSize)
-
-	modifiedDB = originDB.
-		Offset(int(pageParam.OffsetOrSkip())).
-		Limit(int(*pageParam.Size))
-
-	return
 }
 
 func GormError(err error) error {
@@ -153,31 +78,51 @@ func GormError(err error) error {
 	}
 }
 
-func GormQueryListFromSingleTable[R any](db *gorm.DB, tableName string, dto util.DtoQryParam) (util.DtoListResponse[R], error) {
-	if dto == nil {
-		return util.DtoListResponse[R]{}, errors.WrapWithMessage(errors.ErrDeveloper, "dto should not be nil")
-	}
-
-	// filter
-	where := GormFilterDsl(dto.FilterParam())
-	db = db.Table(tableName).Scopes(where...)
-
-	// page
-	db, listBufferSize, pageResponse, err := GormPageDsl(db, dto.PageParam())
+func GormQueryListWithPagination[R any](
+	db *gorm.DB, dtoFilter any, dtoPage util.PageParam, dtoSort util.SortParam,
+) (
+	resp util.ListResponse[R], err error,
+) {
+	db = db.Scopes(GormFilterDsl(dtoFilter)...)
+	var totalSize int64
+	err = db.Count(&totalSize).Error
 	if err != nil {
-		return util.DtoListResponse[R]{}, err
+		err = GormError(err)
+		return
 	}
 
-	// sort
-	orderBy := GormSortDsl(dto.SortParam())
-	db = db.Scopes(orderBy...)
+	db = db.
+		Offset(int(dtoPage.OffsetOrSkip())).
+		Limit(int(dtoPage.Size)).
+		Order(dtoSort.KeyValueString())
 
-	// result
-	list := make([]R, 0, listBufferSize)
+	list := make([]R, 0, dtoPage.Size)
 	err = db.Find(&list).Error
 	if err != nil {
-		return util.DtoListResponse[R]{}, GormError(err)
+		err = GormError(err)
+		return
 	}
 
-	return util.NewDtoListResponse(list, pageResponse), nil
+	pageResponse := util.NewPageResponse(dtoPage, uint64(totalSize))
+	return util.NewListResponseWithPagination(list, &pageResponse), nil
+}
+
+func GormQueryListWithoutPagination[R any](
+	db *gorm.DB, dtoFilter any, dtoSort util.SortParam,
+) (
+	resp util.ListResponse[R], err error,
+) {
+	const defaultSize = 50
+	list := make([]R, 0, defaultSize)
+
+	err = db.
+		Scopes(GormFilterDsl(dtoFilter)...).
+		Order(dtoSort.KeyValueString()).
+		Find(&list).Error
+	if err != nil {
+		err = GormError(err)
+		return
+	}
+
+	return util.NewListResponseWithoutPagination(list), nil
 }

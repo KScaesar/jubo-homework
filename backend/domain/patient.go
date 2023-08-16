@@ -8,8 +8,8 @@ import (
 )
 
 type PatientRepo interface {
-	QueryPatientList(ctx context.Context, dto *DtoQryPatientParam) (util.DtoListResponse[DtoPatientResponse], error)
-	QueryPatientById(ctx context.Context, id string) (DtoPatientResponse, error)
+	QueryPatientList(ctx context.Context, dto *QryPatientParam) (util.ListResponse[PatientResponse], error)
+	QueryPatientById(ctx context.Context, id string) (PatientResponse, error)
 	LockPatientById(ctx context.Context, id string) (Patient, error)
 
 	CreatePatient(ctx context.Context, patient *Patient) error
